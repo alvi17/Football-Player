@@ -1,18 +1,79 @@
 <!doctype html>
-    <html lang="en">
+    <html>
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>My FriendList</title>
+            <title>FootBall Player List</title>
             <link rel="stylesheet" href="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.css" />
 			<script src="jquery-1.11.2.min.js"></script>
 			<script src="jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>
-            <script type="text/javascript" charset="utf-8" src="cordova.js"></script
- 
+            <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+			<script type="text/javascript">
+				document.addEventListener("deviceready",onDeviceReady,false);
+				var db= window.openDatabase("Demo_Db","1.0","A demo Database",20000);
+				
+				function onDeviceReady(){
+				//	alert("device readdy");
+					db.transaction(populateDB,errorCB,successCB);
+				}
+				
+				function populateDB(tx)
+				{
+					tx.executeSql('Drop TABLE IF EXISTS FootballPlayer');
+					tx.executeSql('CREATE TABLE IF NOT EXISTS FootballPlayer (id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL,Club TEXT NOT NULL)');
+					tx.executeSql('INSERT INTO FootballPlayer(Name,Club) VALUES ("Lionel Messi","Barcelona")');
+					tx.executeSql('INSERT INTO FootballPlayer(Name,Club) VALUES ("C. ROnaldo","Real Madrid")');
+				//	alert("Database table created");
+				}
+				
+				function errorCB(err)
+				{
+					alert("Error Processing SQL:"+err.code);
+				
+				}
+				
+				function successCB()
+				{
+					//alert("Success!");
+					db.transaction(queryDB,errorCB);
+				
+				}
+				
+				
+				function queryDB(tx)
+				{
+					tx.executeSql('SELECT * FROM FootballPlayer',[],querySuccess,errorCB);
+					
+				}
+				
+				function querySuccess(tx,result)
+				{
+					$('#FootBallPlayerList').empty();
+					i=0;
+					$.each(result.rows,function(index)
+					{
+					var row = result.rows.item(i++);
+					$('#FootBallPlayerList').append('<li><a href="#"><h3 class="ui-li-heading">'+row['Name']+'</h3><p class="ui-li-desc">Club '+row['Club']+'</p></a></li>');
+					}
+					);
+				
+					$('#FootBallPlayerList').listview();
+				}
+				
+				
+			</script>
         </head>
     <body>
- 
-        <p>Hello</p>
- 
+	<div data-role="page">
+		<div data-role="header" data-position="fixed" data-theme="b">
+			<h1>FootBall Player</h1>
+		</div>
+		
+		<div data-role="content">
+		
+			<ul id="FootBallPlayerList">
+			</ul>
+		</div>
+	</div>
     </body>
 </html>
